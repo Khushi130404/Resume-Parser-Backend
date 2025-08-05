@@ -8,6 +8,67 @@ def extract_text_from_pdf(path):
         text += page.get_text()
     return text
 
+def extract_education(text):
+    prompt = f"""
+    Extract education history from this resume text in JSON array format:
+    [
+        {{
+            "degree": "",
+            "institution": "",
+            "years": "",
+            "cgpa_or_percentile": ""
+        }}
+    ]
+
+    Resume Text:
+    {text}
+    """
+    return ask_local_llm(prompt)
+
+def extract_experience(text):
+    prompt = f"""
+    Extract professional experience from resume text in JSON array format:
+    [
+        {{
+            "title": "",
+            "company": "",
+            "duration": "",
+            "location": "",
+            "description": []
+        }}
+    ]
+
+    Resume Text:
+    {text}
+    """
+    return ask_local_llm(prompt)
+
+def extract_skills(text):
+    prompt = f"""
+    Extract technical skills from the resume as a JSON list.
+
+    Example:
+    ["Python", "React", "Firebase", "SQL"]
+
+    Resume Text:
+    {text}
+    """
+    return ask_local_llm(prompt)
+
+def extract_general_info(text):
+    prompt = f"""
+    Extract full name, email(s), and phone number(s) from resume text in this format:
+    {{
+        "full_name": "",
+        "emails": [],
+        "phone_numbers": []
+    }}
+
+    Resume Text:
+    {text}
+    """
+    return ask_local_llm(prompt)
+
 def extract_links_from_pdf(path):
     doc = fitz.open(path)
     links = []
@@ -17,58 +78,33 @@ def extract_links_from_pdf(path):
                 links.append(link["uri"])
     return links
 
-def extract_resume_data(filename: str):
-    text = extract_text_from_pdf(filename)
-    links = extract_links_from_pdf(filename)
-
+def extract_projects(text):
     prompt = f"""
-    You are a professional resume parser. From the following resume text, extract structured information in JSON format.
-
-    Use the following format:
-    {{
-    "full_name": "",
-    "emails": [],
-    "phone_numbers": [],
-    "education": [
+    Extract project details in this format:
+    [
         {{
-        "degree": "",
-        "institution": "",
-        "years": "",
-        "cgpa_or_percentile": ""
+            "title": "",
+            "duration": "",
+            "tech_stack": [],
+            "description": ""
         }}
-    ],
-    "experience": [
-        {{
-        "title": "",
-        "company": "",
-        "duration": "",
-        "location": "",
-        "description": []
-        }}
-    ],
-    "projects": [
-        {{
-        "title": "",
-        "duration": "",
-        "tech_stack": [],
-        "description": ""
-        }}
-    ],
-    "skills": [],
-    "links": {{
-        "linkedin": "",
-        "github": "",
-        "leetcode": ""
-    }}
-    }}
+    ]
 
     Resume Text:
     {text}
     """
+    return ask_local_llm(prompt)
 
-    structured_info = ask_local_llm(prompt)
+def extract_resume_data(filename: str):
+    text = extract_text_from_pdf(filename)
 
     return {
-        "text_summary": structured_info,
-        "extracted_links": links
+        "full_name_info": extract_general_info(text),
+        "education": extract_education(text),
+        "experience": extract_experience(text),
+        "projects": extract_projects(text),
+        "skills": extract_skills(text),
+        "links": extract_links_from_pdf(filename)
     }
+
+
