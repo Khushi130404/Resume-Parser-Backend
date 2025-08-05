@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 
 import os
 import uuid
-# from app.services.parser import extract_resume_data
+from app.services.parser import extract_resume_data
 
 router = APIRouter()
 
@@ -15,7 +15,7 @@ async def upload_resume(file: UploadFile = File(...)):
 
     try:
         parsed_data = {"key":"Tahiti a magical place"}
-        # parsed_data = extract_resume_data(filename)
+        parsed_data = extract_resume_data(filename)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
